@@ -9,6 +9,7 @@ export const useFetch = (url) => {
   const [callFetch, setCallFetch] = useState(false); // para disparar o useEffect
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [itemId, setItemId] = useState(null); // para armazenar o ID do item a ser deletado
 
   const httpConfig = (data, metodo) => {
     if (metodo === "POST") {
@@ -20,6 +21,15 @@ export const useFetch = (url) => {
         body: JSON.stringify(data),
       });
       setMetodo(metodo);
+    } else if (metodo === "DELETE") {
+      setConfig({
+        method: metodo,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setMetodo(metodo);
+      setItemId(data); // aqui data é o ID do item a ser deletado
     }
   };
 
@@ -27,18 +37,17 @@ export const useFetch = (url) => {
     const fetchData = async () => {
       //estado de carregamento de tela
       setLoading(true);
-    //   tratamento de erros
-    try{
-      const res = await fetch(url);
+      //   tratamento de erros
+      try {
+        const res = await fetch(url);
 
-      const json = await res.json();
-      setData(json);
-    }catch(error){
+        const json = await res.json();
+        setData(json);
+      } catch (error) {
         console.log(error.message);
         setError("Houve um erro ao carregar os dados!");
-    }
-    setLoading(false);
-
+      }
+      setLoading(false);
     };
     fetchData();
   }, [url, callFetch]);
@@ -53,10 +62,38 @@ export const useFetch = (url) => {
         const json = await res.json();
 
         setCallFetch(json);
+      }else if(metodo === "DELETE"){
+        const deleteURL = `${url}/${itemId}`
+        const res = await fetch(deleteURL, config);
+
+        const json = await res.json();
+        setCallFetch(json);
       }
     };
     httpRequest();
-  }, [config, metodo, url]);
+  }, [config, metodo, url, itemId]);
 
-  return { data, httpConfig,loading, error };
+  //metodo DELETE refatorado
+    const deleteData = async (url, id) => {
+    console.log(`Deletando: ${url}/${id}`);
+    try {
+      const res = await fetch(`${url}/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Erro ao deletar o item!");
+      }
+      setData(data.filter((item) => item.id !== id));
+      console.log("Item deletado com sucesso!");
+    } catch (error) {
+      console.log(error.message);
+      setError("Houve um erro ao deletar o item!");
+    }
+  };
+
+  return { data, httpConfig, loading, error, deleteData };
 };

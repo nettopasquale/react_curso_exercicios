@@ -21,3 +21,10 @@ form input{
   flex-direction: column;
   margin-bottom: 15px;
 }
+
+ul li button{
+  margin-left: 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}

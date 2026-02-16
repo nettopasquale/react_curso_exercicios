@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
+import {useState } from "react";
 import { useFetch } from "./hooks/useFetch";
 import "./App.css";
 
 const url = "http://localhost:3000/produtos";
 
 function App() {
-  const [produtos, setProdutos] = useState([]);
+  const [produtos] = useState([]);
   const [nome, setNome] = useState("");
   const [preco, setPreco] = useState("");
 
   //custom hook de fetch
-  const {data: items, httpConfig, loading, error} = useFetch(url); // renomeia data para items
+  const {data: items, httpConfig, loading, error, deleteData} = useFetch(url); // renomeia data para items
   console.log(items);
 
   //adicionar produtos
@@ -28,6 +28,33 @@ function App() {
     setPreco("");
   };
 
+  const handleDelete = (url,id) => {
+    // lógica para deletar um produto
+    //httpConfig(id, "DELETE");
+    deleteData(url, id);
+    
+  }
+
+  //   const deleteData = async (url, id) => {
+  //   console.log(`Deletando: ${url}/${id}`);
+  //   try {
+  //     const res = await fetch(`${url}/${id}`, {
+  //       method: "DELETE",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+
+  //     if (!res.ok) {
+  //       throw new Error("Erro ao deletar o item!");
+  //     }
+  //     setProdutos(produtos.filter((item) => item.id !== id));
+  //     console.log("Item deletado com sucesso!");
+  //   } catch (error) {
+  //     console.log(error.message);
+  //   }
+  // };
+
   console.log(produtos);
   return (
     <div className="app">
@@ -41,6 +68,8 @@ function App() {
         {items && items.map((item) => (
           <li key={item.id}>
             {item.nome} - R$ {item.preco}
+            {/* botão de deletar produtos */}
+            <button onClick={()=> handleDelete(url,item.id)}>Deletar</button>
           </li>
         ))}
       </ul>
